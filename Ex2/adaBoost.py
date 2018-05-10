@@ -1,5 +1,5 @@
-from numpy.random import choice
 from decision_tree_utils import *
+import random
 
 
 class AdaBoost:
@@ -25,7 +25,7 @@ class AdaBoost:
         # sample the input data from the training set, based on weight
         self.input_data = []
         for i in range(0, self.N):
-            index = choice(range(0, self.N), p=self.weights)
+            index = AdaBoost.weighted_choice(range(0, self.N), self.weights)
             self.input_data.append(self.training_set[index])
 
         return self.input_data
@@ -153,7 +153,7 @@ class AdaBoost:
         t = int(len(train) / 3)
         j = 0
         for i in range(0, t):
-            index = choice(range(0, len(train) - j))
+            index = random.choice(range(0, len(train) - j))
             test.append(train[index])
             train.pop(index)
             j += 1
@@ -188,13 +188,22 @@ class AdaBoost:
             s += acc
             r = 0
         mean = s / 10
-        print "mean for " + str(repetitions) + " repetitions with depth " + str(iterations) + ": " + str(mean)
+        print "\nMean for " + str(repetitions) + " repetitions with depth " + str(iterations) + ": " + str(mean)
 
         for acc in accs:
             acc = (mean - acc) ** 2
 
         standard_deviation = math.sqrt(sum(accs) / 10)
         print "standard deviation: " + str(standard_deviation)
+
+    @staticmethod
+    def weighted_choice(choices, weights):
+        total = sum(weights)
+        treshold = random.uniform(0, total)
+        for k, weight in enumerate(weights):
+            total -= weight
+            if total < treshold:
+                return choices[k]
 
 
 if __name__ == '__main__':
