@@ -20,6 +20,8 @@ class AdaBoost:
         self.errors = []
         self.input_data = training_set
 
+        self.base_classifier_depth = 2 ** 31
+
     # a)
     def sample(self):
         # sample the input data from the training set, based on weight
@@ -40,7 +42,7 @@ class AdaBoost:
         for x in range(0, iterations):
 
             # apply the learning algorithm
-            tree = trainModel(self.input_data, self.C, self.attributes)
+            tree = trainModel(self.input_data, self.C, self.attributes, self.base_classifier_depth)
 
             # calculate the error
             ee = []
@@ -112,6 +114,10 @@ class AdaBoost:
         t = class_weights.index(max(class_weights))
         return occurrences[t]
 
+    # set the base classifiers depth for task g)
+    def set_base_classifier_depth(self, depth):
+        self.base_classifier_depth = depth
+
     # auxiliary function
     @staticmethod
     def get_attribute_index(meta, C):
@@ -122,10 +128,20 @@ class AdaBoost:
             j += 1
         return -1
 
+    # auxiliary function
+    @staticmethod
+    def weighted_choice(choices, weights):
+        total = sum(weights)
+        treshold = random.uniform(0, total)
+        for k, weight in enumerate(weights):
+            total -= weight
+            if total < treshold:
+                return choices[k]
+
     # d)
     @staticmethod
     def weather_test(iterations):
-        print "Exercise 2 d) - testing on weather.nominal.arff with " + str(iterations) + " iterations..."
+        print "Exercise 2 d) - testing on weather.nominal.arff with " + str(iterations) + " iterations(trees)..."
         dataset = parseARFF('res/weather.nominal.arff')
         target = 'play'
         attributes = dataset[0]  # extract attributes from the loaded dataset
@@ -140,8 +156,8 @@ class AdaBoost:
 
     # e)
     @staticmethod
-    def car_test(iterations):
-        print "Exercise 2 e) - testing on car.arff with " + str(iterations) + " iterations..."
+    def car_test(iterations, max_depth=2**31):
+        print "Testing on car.arff with " + str(iterations) + " iterations (trees)..."
         dataset = parseARFF('res/car.arff')
         target = 'class'
 
@@ -160,6 +176,7 @@ class AdaBoost:
 
         # build the adaBoost classifier
         m = AdaBoost(train, attributes, target)
+        m.set_base_classifier_depth(max_depth)
         m.model_generation(iterations)
 
         # calculate the accuracy on the test set
@@ -188,7 +205,7 @@ class AdaBoost:
             s += acc
 
         mean = s / 10
-        print "\nMean for " + str(repetitions) + " repetitions with depth " + str(iterations) + ": " + str(mean)
+        print "\nMean for " + str(repetitions) + " repetitions with " + str(iterations) + " trees: " + str(mean)
 
         difs = []
         for acc in accs:
@@ -197,14 +214,19 @@ class AdaBoost:
         standard_deviation = math.sqrt(sum(difs) / 10)
         print "standard deviation: " + str(standard_deviation)
 
+    # g)
     @staticmethod
-    def weighted_choice(choices, weights):
-        total = sum(weights)
-        treshold = random.uniform(0, total)
-        for k, weight in enumerate(weights):
-            total -= weight
-            if total < treshold:
-                return choices[k]
+    def classifier_test():
+        print "Exercise 2 g)..."
+        upto = 10
+        s = 0
+        accs = []
+        for i in range(0, upto):
+            acc = AdaBoost.car_test(10, i)
+            accs.append(acc)
+
+        print "\nAccuracies for base-classifier-depth from [1..10]: "
+        print accs
 
 
 if __name__ == '__main__':
@@ -214,14 +236,24 @@ if __name__ == '__main__':
     print '-'*10 + "\n"
 
     # e)
+    print "Exercise 2 e)"
     AdaBoost.car_test(10)
 
     print '-' * 10 + "\n"
 
     # f)
+    # each with 3 trees, since it takes a while
     AdaBoost.car_test_mean_deviation(3)
 
+    print '-' * 10 + "\n"
 
+    # g)
+    # this might take a bit
+    AdaBoost.classifier_test()
+    print "The results show that an increase in maximum base classifier depth, " \
+          "only has a noticeable impact until about the fifth try."
+    print "One possible reason for this is, that there are only few attributes and possible classes " \
+          "in the car.arff data set."
 
 
 
