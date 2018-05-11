@@ -186,14 +186,15 @@ class AdaBoost:
             acc = AdaBoost.car_test(iterations)
             accs.append(acc)
             s += acc
-            r = 0
+
         mean = s / 10
         print "\nMean for " + str(repetitions) + " repetitions with depth " + str(iterations) + ": " + str(mean)
 
+        difs = []
         for acc in accs:
-            acc = (mean - acc) ** 2
+            difs.append((mean - acc) ** 2)
 
-        standard_deviation = math.sqrt(sum(accs) / 10)
+        standard_deviation = math.sqrt(sum(difs) / 10)
         print "standard deviation: " + str(standard_deviation)
 
     @staticmethod
