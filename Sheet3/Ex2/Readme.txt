@@ -4,4 +4,9 @@ ABOUT:
 HOW TO START EXERCISE 2:
 	Open a command line in the current directory:
 		> cd Ex2
-		> AdaBoost.py
+		> adaBoost.py
+
+	This will start the specified examples from the exercise sheet.
+	All relevant code for this weeks assignement is in 'adaBoost.py'.
+	'decision_tree_utils.py' is our previous weeks decision tree implementation, 
+	which was used as a base classifier for the boost.
